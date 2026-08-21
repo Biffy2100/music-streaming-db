@@ -1,4 +1,4 @@
-user music_streaming_db;
+use music_streaming_db;
 
 CREATE TABLE `USERS`(
     User_ID INT PRIMARY KEY AUTO_INCREMENT,
