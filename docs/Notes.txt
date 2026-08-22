@@ -26,3 +26,28 @@ PODCAST
 EPISODE
 USER_EPISODE
 
+Artists:
+- Favourite Artist A: two albums, mostly pop
+- Favourite Artist B: two albums, electronic
+- Favourite Artist C: two albums, jazz
+- Favourite Artist D: one classic album and one recent album
+
+Users:
+- Alice follows Artists A and B, listens mostly at night
+- Bob follows Artists C and D, uses the free plan
+- Charlie follows everyone but listens mostly to older albums
+- Diana creates collaborative playlists and listens frequently
+
+Playlists:
+- Rainy Commute
+- Gym Songs That Actually Work
+- Deep Cuts Only
+- One-Hour Focus Session
+- Songs From My First Year of University
+
+Listening history:
+- Repeat popular songs several times
+- Let users have distinct preferences
+- Include dates across several months
+- Add morning, afternoon, and late-night plays
+- Make some songs popular globally but not by every user

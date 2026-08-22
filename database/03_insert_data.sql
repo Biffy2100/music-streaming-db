@@ -1,150 +1,293 @@
 USE music_streaming_db;
 
--- =========================================
--- 1. USERS
--- =========================================
-INSERT INTO users (Name, Email, Date_Joined) VALUES
-('Alice Smith', 'alice@example.com', '2023-01-15'),
-('Bob Jones', 'bob@example.com', '2023-02-20'),
-('Charlie Brown', 'charlie@example.com', '2023-03-10'),
-('Diana Prince', 'diana@example.com', '2023-04-05'),
-('Evan Wright', 'evan@example.com', '2023-05-12');
+-- Clear every table before loading the sample dataset.
+SET FOREIGN_KEY_CHECKS = 0;
 
--- =========================================
--- 2. SUBSCRIPTION
--- =========================================
-INSERT INTO subscription (Plan_Type, Start_Date, End_Date, User_ID) VALUES
-('Premium Individual', '2023-01-15', '2024-01-15', 1),
-('Free', '2023-02-20', NULL, 2),
-('Premium Student', '2023-03-10', '2024-03-10', 3),
-('Family Plan', '2023-04-05', '2024-04-05', 4),
-('Free', '2023-05-12', NULL, 5);
+DELETE FROM user_episode;
 
--- =========================================
--- 3. ARTIST
--- =========================================
-INSERT INTO artist (Artist_Name, Country) VALUES
-('The Midnight', 'United States'),
-('Dua Lipa', 'United Kingdom'),
-('Miles Davis', 'United States'),
-('Daft Punk', 'France'),
-('Taylor Swift', 'United States');
+DELETE FROM listening_history;
 
--- =========================================
--- 4. GENRE
--- =========================================
-INSERT INTO genre (Genre_Name) VALUES
-('Synthwave'),
-('Pop'),
-('Jazz'),
-('Electronic'),
-('Rock');
+DELETE FROM user_artist;
 
--- =========================================
--- 5. ALBUM
--- =========================================
-INSERT INTO album (Album_Name, Release_Date, Artist_ID) VALUES
-('Endless Summer', '2016-08-05', 1),
-('Future Nostalgia', '2020-03-27', 2),
-('Kind of Blue', '1959-08-17', 3),
-('Random Access Memories', '2013-05-17', 4),
-('1989', '2014-10-27', 5);
+DELETE FROM artist_song;
 
--- =========================================
--- 6. SONG
--- =========================================
--- Duration is stored in seconds
-INSERT INTO song (Title, Duration, Album_ID, Genre_ID) VALUES
-('Sunset', 326, 1, 1),
-('Vampires', 317, 1, 1),
-('Don\'t Start Now', 183, 2, 2),
-('Levitating', 203, 2, 2),
-('So What', 562, 3, 3),
-('Get Lucky', 248, 4, 4),
-('Blank Space', 231, 5, 2),
-('Shake It Off', 219, 5, 2);
+DELETE FROM playlist_song;
 
--- =========================================
--- 7. PLAYLIST
--- =========================================
-INSERT INTO playlist (Playlist_Name, Created_Date, User_ID) VALUES
-('Night Drives', '2023-01-20', 1),
-('Workout Energy', '2023-02-25', 2),
-('Focus & Study', '2023-03-15', 3),
-('Party Mix', '2023-04-10', 4);
+DELETE FROM episode;
 
--- =========================================
--- 8. PLAYLIST_SONG
--- =========================================
-INSERT INTO playlist_song (Playlist_ID, Song_ID) VALUES
-(1, 1), -- Night Drives: Sunset
-(1, 2), -- Night Drives: Vampires
-(1, 6), -- Night Drives: Get Lucky
-(2, 3), -- Workout Energy: Don't Start Now
-(2, 4), -- Workout Energy: Levitating
-(2, 8), -- Workout Energy: Shake It Off
-(3, 5), -- Focus & Study: So What
-(4, 3), -- Party Mix: Don't Start Now
-(4, 4), -- Party Mix: Levitating
-(4, 6); -- Party Mix: Get Lucky
+DELETE FROM song;
 
--- =========================================
--- 9. ARTIST_SONG
--- =========================================
-INSERT INTO artist_song (Artist_ID, Song_ID) VALUES
-(1, 1), -- The Midnight -> Sunset
-(1, 2), -- The Midnight -> Vampires
-(2, 3), -- Dua Lipa -> Don't Start Now
-(2, 4), -- Dua Lipa -> Levitating
-(3, 5), -- Miles Davis -> So What
-(4, 6), -- Daft Punk -> Get Lucky
-(5, 7), -- Taylor Swift -> Blank Space
-(5, 8); -- Taylor Swift -> Shake It Off
+DELETE FROM playlist;
 
--- =========================================
--- 10. USER_ARTIST (Followed Artists)
--- =========================================
-INSERT INTO user_artist (User_ID, Artist_ID) VALUES
-(1, 1), (1, 4),
-(2, 2), (2, 5),
-(3, 3),
-(4, 2), (4, 4), (4, 5);
+DELETE FROM album;
 
--- =========================================
--- 11. LISTENING_HISTORY
--- =========================================
-INSERT INTO listening_history (User_ID, Song_ID, Played_At) VALUES
-(1, 1, '2023-06-01 08:30:00'),
-(1, 2, '2023-06-01 08:35:30'),
-(2, 3, '2023-06-01 12:15:00'),
-(2, 4, '2023-06-01 12:18:10'),
-(3, 5, '2023-06-02 14:00:00'),
-(4, 6, '2023-06-02 18:45:00'),
-(1, 6, '2023-06-03 21:10:00');
+DELETE FROM genre;
 
--- =========================================
--- 12. PODCAST
--- =========================================
-INSERT INTO podcast (Podcast_Name, Description) VALUES
-('Tech Daily', 'Daily insights into technology and software development.'),
-('The Joe Rogan Experience', 'Long-form conversations with various guests.'),
-('Crime Junkie', 'A weekly true crime podcast.');
+DELETE FROM artist;
 
--- =========================================
--- 13. EPISODE
--- =========================================
--- Duration in seconds
-INSERT INTO episode (Title, Duration, Release_Date, Podcast_ID) VALUES
-('The Future of AI', 1800, '2023-05-01', 1),
-('Building Scalable Web Apps', 2400, '2023-05-08', 1),
-('Episode #1900 - Tech Special', 7200, '2023-04-12', 2),
-('Infamous Cold Case Solved', 2700, '2023-05-15', 3);
+DELETE FROM subscription;
 
--- =========================================
--- 14. USER_EPISODE
--- =========================================
-INSERT INTO user_episode (User_ID, Episode_ID, Played_At) VALUES
-(1, 1, '2023-05-02 09:00:00'),
-(1, 2, '2023-05-09 10:30:00'),
-(3, 3, '2023-04-13 15:00:00'),
-(5, 4, '2023-05-16 20:15:00');
+DELETE FROM users;
+
+ALTER TABLE user_episode AUTO_INCREMENT = 1;
+
+ALTER TABLE listening_history AUTO_INCREMENT = 1;
+
+ALTER TABLE episode AUTO_INCREMENT = 1;
+
+ALTER TABLE podcast AUTO_INCREMENT = 1;
+
+ALTER TABLE song AUTO_INCREMENT = 1;
+
+ALTER TABLE playlist AUTO_INCREMENT = 1;
+
+ALTER TABLE album AUTO_INCREMENT = 1;
+
+ALTER TABLE genre AUTO_INCREMENT = 1;
+
+ALTER TABLE artist AUTO_INCREMENT = 1;
+
+ALTER TABLE subscription AUTO_INCREMENT = 1;
+
+ALTER TABLE users AUTO_INCREMENT = 1;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- Base entities
+INSERT INTO
+    users (Name, Email, Date_Joined)
+VALUES (
+        'Aarav Mehta',
+        'aarav@example.com',
+        '2024-01-15'
+    ),
+    (
+        'Maya Chen',
+        'maya@example.com',
+        '2024-03-02'
+    ),
+    (
+        'Noah Williams',
+        'noah@example.com',
+        '2024-05-21'
+    ),
+    (
+        'Sofia Garcia',
+        'sofia@example.com',
+        '2024-07-09'
+    );
+
+INSERT INTO
+    subscription (
+        Plan_Type,
+        Start_Date,
+        End_Date,
+        User_ID
+    )
+VALUES (
+        'Premium',
+        '2024-01-15',
+        NULL,
+        1
+    ),
+    (
+        'Family',
+        '2024-03-02',
+        NULL,
+        2
+    ),
+    ('Free', '2024-05-21', NULL, 3),
+    (
+        'Premium',
+        '2024-07-09',
+        '2025-07-09',
+        4
+    );
+
+INSERT INTO
+    artist (Artist_Name, Country)
+VALUES ('Arijit Singh', 'India'),
+    ('The Weeknd', 'Canada'),
+    ('Coldplay', 'United Kingdom'),
+    (
+        'Taylor Swift',
+        'United States'
+    ),
+    ('Tame Impala', 'Australia');
+
+INSERT INTO
+    genre (Genre_Name)
+VALUES ('Bollywood'),
+    ('R&B'),
+    ('Rock'),
+    ('Pop'),
+    ('Indie');
+
+INSERT INTO
+    album (
+        Album_Name,
+        Release_Date,
+        Artist_ID
+    )
+VALUES ('Tum Hi Ho', '2013-04-26', 1),
+    (
+        'After Hours',
+        '2020-03-20',
+        2
+    ),
+    ('Parachutes', '2000-07-10', 3),
+    ('1989', '2014-10-27', 4),
+    ('Currents', '2015-07-17', 5);
+
+INSERT INTO
+    song (
+        Title,
+        Duration,
+        Album_ID,
+        Genre_ID
+    )
+VALUES ('Tum Hi Ho', 262, 1, 1),
+    (
+        'Chahun Main Ya Naa',
+        277,
+        1,
+        1
+    ),
+    ('Blinding Lights', 200, 2, 2),
+    ('Save Your Tears', 216, 2, 2),
+    ('Yellow', 266, 3, 3),
+    ('Shiver', 304, 3, 3),
+    ('Blank Space', 231, 4, 4),
+    ('Style', 231, 4, 4),
+    (
+        'The Less I Know the Better',
+        216,
+        5,
+        5
+    ),
+    ('Eventually', 318, 5, 5);
+
+-- User-created collections and podcasts
+INSERT INTO
+    playlist (
+        Playlist_Name,
+        Created_Date,
+        User_ID
+    )
+VALUES (
+        'Aarav Favorites',
+        '2024-01-20',
+        1
+    ),
+    (
+        'Morning Commute',
+        '2024-03-10',
+        2
+    ),
+    (
+        'Weekend Mix',
+        '2024-06-01',
+        3
+    );
+
+INSERT INTO
+    podcast (Podcast_Name, Description)
+VALUES (
+        'The Daily Byte',
+        'Short conversations about technology and culture.'
+    ),
+    (
+        'History Unpacked',
+        'Accessible stories from around the world.'
+    );
+
+INSERT INTO
+    episode (
+        Title,
+        Duration,
+        Release_Date,
+        Podcast_ID
+    )
+VALUES (
+        'How Streaming Changed Music',
+        1840,
+        '2024-08-01',
+        1
+    ),
+    (
+        'Designing Better Recommendations',
+        2110,
+        '2024-08-08',
+        1
+    ),
+    (
+        'The Silk Road in Three Objects',
+        2360,
+        '2024-08-05',
+        2
+    );
+
+-- Many-to-many relationships
+INSERT INTO
+    playlist_song (Playlist_ID, Song_ID)
+VALUES (1, 1),
+    (1, 3),
+    (1, 5),
+    (1, 7),
+    (2, 3),
+    (2, 5),
+    (2, 9),
+    (3, 2),
+    (3, 4),
+    (3, 6),
+    (3, 8),
+    (3, 10);
+
+INSERT INTO
+    artist_song (Artist_ID, Song_ID)
+VALUES (1, 1),
+    (1, 2),
+    (2, 3),
+    (2, 4),
+    (3, 5),
+    (3, 6),
+    (4, 7),
+    (4, 8),
+    (5, 9),
+    (5, 10);
+
+INSERT INTO
+    user_artist (User_ID, Artist_ID)
+VALUES (1, 1),
+    (1, 2),
+    (1, 3),
+    (2, 3),
+    (2, 4),
+    (3, 2),
+    (3, 5),
+    (4, 1),
+    (4, 4);
+
+-- Playback history
+INSERT INTO
+    listening_history (User_ID, Song_ID, Played_At)
+VALUES (1, 1, '2024-08-10 08:15:00'),
+    (1, 3, '2024-08-10 08:20:00'),
+    (1, 5, '2024-08-10 08:24:00'),
+    (2, 3, '2024-08-11 09:00:00'),
+    (2, 7, '2024-08-11 09:05:00'),
+    (3, 9, '2024-08-12 18:30:00'),
+    (4, 1, '2024-08-13 20:00:00'),
+    (4, 3, '2024-08-13 20:05:00');
+
+INSERT INTO
+    user_episode (
+        User_ID,
+        Episode_ID,
+        Played_At
+    )
+VALUES (1, 1, '2024-08-10 10:00:00'),
+    (1, 2, '2024-08-11 10:00:00'),
+    (2, 3, '2024-08-12 07:30:00'),
+    (3, 1, '2024-08-13 12:15:00'),
+    (4, 2, '2024-08-14 16:45:00');
