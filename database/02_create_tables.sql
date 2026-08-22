@@ -1,9 +1,21 @@
-use music_streaming_db;
+USE music_streaming_db;
 
-CREATE TABLE `USERS`(
+DROP TABLE IF EXISTS subscription;
+DROP TABLE IF EXISTS users;
+
+CREATE TABLE USERS(
     User_ID INT PRIMARY KEY AUTO_INCREMENT,
     Name VARCHAR(100) NOT NULL,
     Email VARCHAR(100) NOT NULL,
     Date_Joined DATE NOT NULL
 );
 
+CREATE TABLE subscription(
+    Subscription_ID INT PRIMARY KEY AUTO_INCREMENT,
+    Plan_Type VARCHAR(50) NOT NULL,
+    Start_Date DATE NOT NULL,
+    End_Date DATE,
+    User_ID INT NOT NULL UNIQUE,
+
+    FOREIGN KEY (User_ID) REFERENCES USERS(User_ID)
+);
