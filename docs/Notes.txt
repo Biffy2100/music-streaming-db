@@ -1,0 +1,28 @@
+| Layer               | Technology             |
+| ------------------- | ---------------------- |
+| **Frontend**        | React.js               |
+| **Backend**         | Python + Flask         |
+| **Database**        | MySQL                  |
+| **DB Connector**    | MySQL Connector/Python |
+| **API**             | REST API               |
+| **Testing**         | Postman                |
+| **Development**     | VS Code                |
+| **Version Control** | Git + GitHub           |
+
+
+
+USER
+SUBSCRIPTION
+ARTIST
+GENRE
+ALBUM
+SONG
+PLAYLIST
+PLAYLIST_SONG
+ARTIST_SONG
+USER_ARTIST
+LISTENING_HISTORY
+PODCAST
+EPISODE
+USER_EPISODE
+
