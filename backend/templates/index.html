@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoundVault — Music Streaming DBMS</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="dark-theme">
+  <div class="app-layout">
+    
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo">
+          <div class="logo-icon">
+            <i data-lucide="disc-3"></i>
+          </div>
+          <div class="logo-text">
+            <span class="brand-name">SoundVault</span>
+            <span class="brand-sub">DBMS GROUP 21</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <span class="nav-section-title">DISCOVER</span>
+          <button class="nav-item active" data-view="home">
+            <i data-lucide="home"></i>
+            <span>Home</span>
+          </button>
+          <button class="nav-item" data-view="songs">
+            <i data-lucide="music"></i>
+            <span>All Songs</span>
+            <span class="badge" id="badge-songs-count">49</span>
+          </button>
+          <button class="nav-item" data-view="artists">
+            <i data-lucide="mic-2"></i>
+            <span>Artists</span>
+          </button>
+          <button class="nav-item" data-view="albums">
+            <i data-lucide="disc"></i>
+            <span>Albums</span>
+          </button>
+        </div>
+
+        <div class="nav-section">
+          <span class="nav-section-title">LIBRARY</span>
+          <button class="nav-item" data-view="playlists">
+            <i data-lucide="list-music"></i>
+            <span>Playlists</span>
+          </button>
+          <button class="nav-item" data-view="podcasts">
+            <i data-lucide="radio"></i>
+            <span>Podcasts</span>
+          </button>
+          <button class="nav-item" data-view="history">
+            <i data-lucide="history"></i>
+            <span>Listening History</span>
+          </button>
+        </div>
+
+        <div class="nav-section">
+          <span class="nav-section-title">DBMS REVIEW 2 LAB</span>
+          <button class="nav-item highlight-nav" data-view="dml">
+            <i data-lucide="zap"></i>
+            <span>10 DML Queries</span>
+            <span class="badge badge-accent">Review 2</span>
+          </button>
+          <button class="nav-item" data-view="sql">
+            <i data-lucide="terminal"></i>
+            <span>SQL Console & Schema</span>
+          </button>
+        </div>
+
+        <div class="nav-section mt-auto">
+          <button class="nav-item" id="btn-open-db-modal">
+            <i data-lucide="database"></i>
+            <span>Database Config</span>
+          </button>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="db-status-pill" id="db-status-pill" title="Click to view database settings">
+          <span class="status-dot"></span>
+          <span class="status-label" id="status-engine-text">SQLite (Active)</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <main class="main-wrapper">
+      
+      <!-- TOP NAVIGATION BAR -->
+      <header class="topbar">
+        <div class="topbar-search">
+          <i data-lucide="search" class="search-icon"></i>
+          <input type="text" id="global-search-input" placeholder="Search songs, artists, albums..." autocomplete="off">
+          <button class="clear-search-btn" id="clear-search-btn" style="display: none;">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+
+        <div class="topbar-actions">
+          <!-- Active User Switcher -->
+          <div class="user-selector-wrapper">
+            <label for="user-select" class="user-label">Active User:</label>
+            <div class="custom-select">
+              <i data-lucide="user" class="user-icon"></i>
+              <select id="user-select">
+                <option value="1">Aarav Mehta (Premium)</option>
+                <option value="2">Maya Chen (Family)</option>
+                <option value="3">Noah Williams (Free)</option>
+                <option value="4">Sofia Garcia (Premium)</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="btn-icon" id="quick-refresh-btn" title="Refresh Data">
+            <i data-lucide="rotate-cw"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- VIEWS CONTAINER -->
+      <div class="content-area" id="content-area">
+        
+        <!-- 1. HOME VIEW -->
+        <section class="view-container active" id="view-home">
+          <!-- Hero Banner -->
+          <div class="hero-banner">
+            <div class="hero-content">
+              <span class="hero-badge">MUSIC STREAMING DBMS PLATFORM</span>
+              <h1 class="hero-title">Welcome back, <span id="hero-user-name">Aarav</span> 👋</h1>
+              <p class="hero-subtitle">
+                Explore 49 curated tracks, albums, artist relations, podcasts, and the verified 10 DML relational queries.
+              </p>
+              <div class="hero-actions">
+                <button class="btn btn-primary" onclick="app.playQuickSong(1)">
+                  <i data-lucide="play"></i> Listen Now
+                </button>
+                <button class="btn btn-secondary" onclick="app.switchView('dml')">
+                  <i data-lucide="zap"></i> View 10 DML Queries
+                </button>
+              </div>
+            </div>
+            <div class="hero-graphic">
+              <div class="vinyl-art floating">
+                <i data-lucide="disc-3"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Stats Cards -->
+          <div class="stats-grid">
+            <div class="stat-card" onclick="app.switchView('songs')">
+              <div class="stat-icon bg-green"><i data-lucide="music"></i></div>
+              <div class="stat-info">
+                <span class="stat-number" id="stat-songs">49</span>
+                <span class="stat-title">Catalog Songs</span>
+              </div>
+            </div>
+            <div class="stat-card" onclick="app.switchView('artists')">
+              <div class="stat-icon bg-purple"><i data-lucide="mic-2"></i></div>
+              <div class="stat-info">
+                <span class="stat-number" id="stat-artists">11</span>
+                <span class="stat-title">Artists</span>
+              </div>
+            </div>
+            <div class="stat-card" onclick="app.switchView('albums')">
+              <div class="stat-icon bg-blue"><i data-lucide="disc"></i></div>
+              <div class="stat-info">
+                <span class="stat-number" id="stat-albums">17</span>
+                <span class="stat-title">Albums</span>
+              </div>
+            </div>
+            <div class="stat-card" onclick="app.switchView('playlists')">
+              <div class="stat-icon bg-orange"><i data-lucide="list-music"></i></div>
+              <div class="stat-info">
+                <span class="stat-number" id="stat-playlists">15</span>
+                <span class="stat-title">Playlists</span>
+              </div>
+            </div>
+            <div class="stat-card" onclick="app.switchView('podcasts')">
+              <div class="stat-icon bg-red"><i data-lucide="radio"></i></div>
+              <div class="stat-info">
+                <span class="stat-number" id="stat-podcasts">3</span>
+                <span class="stat-title">Podcasts</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Listens / Recommendations -->
+          <div class="content-section">
+            <div class="section-header">
+              <h2 class="section-title">Recently Listened by <span id="section-user-name">Aarav</span></h2>
+              <button class="see-all-btn" onclick="app.switchView('history')">View Full History</button>
+            </div>
+            <div class="cards-grid" id="home-recent-songs">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- Top Artists Section -->
+          <div class="content-section">
+            <div class="section-header">
+              <h2 class="section-title">Popular Artists</h2>
+              <button class="see-all-btn" onclick="app.switchView('artists')">See All</button>
+            </div>
+            <div class="artist-chips-grid" id="home-top-artists">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. ALL SONGS VIEW -->
+        <section class="view-container" id="view-songs">
+          <div class="view-header">
+            <div>
+              <h1 class="view-title">Song Catalog</h1>
+              <p class="view-description">Browse and stream all 49 songs with live playback and playlist management.</p>
+            </div>
+            <div class="genre-filter-group" id="genre-filters">
+              <button class="chip-filter active" data-genre="">All Genres</button>
+              <button class="chip-filter" data-genre="1">Bollywood</button>
+              <button class="chip-filter" data-genre="2">R&B</button>
+              <button class="chip-filter" data-genre="3">Rock</button>
+              <button class="chip-filter" data-genre="4">Pop</button>
+              <button class="chip-filter" data-genre="5">Indie</button>
+              <button class="chip-filter" data-genre="6">Electronic</button>
+              <button class="chip-filter" data-genre="7">Christmas</button>
+            </div>
+          </div>
+
+          <div class="table-card">
+            <table class="data-table" id="songs-table">
+              <thead>
+                <tr>
+                  <th style="width: 50px;">Play</th>
+                  <th style="width: 50px;">#</th>
+                  <th>Title</th>
+                  <th>Artist</th>
+                  <th>Album</th>
+                  <th>Duration</th>
+                  <th>Genre</th>
+                  <th style="width: 100px; text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="songs-tbody">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 3. ARTISTS VIEW -->
+        <section class="view-container" id="view-artists">
+          <div class="view-header">
+            <div>
+              <h1 class="view-title">Artists Directory</h1>
+              <p class="view-description">Explore artists, their origin countries, albums, and total songs.</p>
+            </div>
+          </div>
+          <div class="cards-grid" id="artists-grid">
+            <!-- Populated via JS -->
+          </div>
+        </section>
+
+        <!-- 4. ALBUMS VIEW -->
+        <section class="view-container" id="view-albums">
+          <div class="view-header">
+            <div>
+              <h1 class="view-title">Album Discography</h1>
+              <p class="view-description">Browse through albums and their associated release dates and tracklists.</p>
+            </div>
+          </div>
+          <div class="cards-grid" id="albums-grid">
+            <!-- Populated via JS -->
+          </div>
+        </section>
+
+        <!-- 5. PLAYLISTS VIEW -->
+        <section class="view-container" id="view-playlists">
+          <div class="view-header">
+            <div>
+              <h1 class="view-title">Playlists</h1>
+              <p class="view-description">Manage collections created by users or generate your own.</p>
+            </div>
+            <button class="btn btn-primary" id="btn-create-playlist-modal">
+              <i data-lucide="plus"></i> New Playlist
+            </button>
+          </div>
+          <div class="cards-grid" id="playlists-grid">
+            <!-- Populated via JS -->
+          </div>
+        </section>
+
+        <!-- 6. PODCASTS VIEW -->
+        <section class="view-container" id="view-podcasts">
+          <div class="view-header">
+            <div>
+              <h1 class="view-title">Podcasts & Episodes</h1>
+              <p class="view-description">Talk shows, stories, and debates with full episode tracking.</p>
+            </div>
+          </div>
+          <div class="podcasts-container" id="podcasts-list">
+            <!-- Populated via JS -->
+          </div>
+        </section>
+
+        <!-- 7. LISTENING HISTORY VIEW -->
+        <section class="view-container" id="view-history">
+          <div class="view-header">
+            <div>
+              <h1 class="view-title">Listening History</h1>
+              <p class="view-description">Activity log for <span id="history-user-label">Aarav Mehta</span>.</p>
+            </div>
+          </div>
+          <div class="table-card">
+            <table class="data-table" id="history-table">
+              <thead>
+                <tr>
+                  <th style="width: 60px;">Play</th>
+                  <th>Song</th>
+                  <th>Artist</th>
+                  <th>Album</th>
+                  <th>Played At</th>
+                </tr>
+              </thead>
+              <tbody id="history-tbody">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 8. 10 DML QUERIES REVIEW LAB -->
+        <section class="view-container" id="view-dml">
+          <div class="dml-lab-header">
+            <div class="dml-badge">DBMS REVIEW 2 SHOWCASE</div>
+            <h1 class="view-title">Ten Relational DML Queries</h1>
+            <p class="view-description">
+              Live execution of the 10 Data Manipulation Language (DML) queries implemented for Project Review 2.
+              Click any query below to run it against the active database engine in real-time.
+            </p>
+          </div>
+
+          <!-- Query Navigator Tabs -->
+          <div class="dml-pills-bar" id="dml-pills-bar">
+            <!-- Pills Q1..Q10 dynamically rendered -->
+          </div>
+
+          <!-- Active Query Display Card -->
+          <div class="dml-card" id="dml-active-card">
+            <div class="dml-card-header">
+              <div>
+                <span class="query-number-tag" id="dml-q-num">Query 1</span>
+                <h2 class="dml-query-title" id="dml-q-title">Display all songs</h2>
+              </div>
+              <div class="dml-actions">
+                <button class="btn btn-outline" id="btn-copy-sql" title="Copy SQL">
+                  <i data-lucide="copy"></i> Copy SQL
+                </button>
+                <button class="btn btn-primary" id="btn-run-dml">
+                  <i data-lucide="play"></i> Execute Query
+                </button>
+              </div>
+            </div>
+
+            <p class="dml-desc" id="dml-q-desc">Display the title and duration of all songs.</p>
+
+            <div class="sql-code-block">
+              <pre><code id="dml-q-sql">SELECT Title, Duration FROM song;</code></pre>
+            </div>
+
+            <!-- Execution stats -->
+            <div class="dml-exec-meta" id="dml-exec-meta">
+              <span class="meta-item"><i data-lucide="cpu"></i> Engine: <b id="dml-meta-engine">SQLite</b></span>
+              <span class="meta-item"><i data-lucide="clock"></i> Latency: <b id="dml-meta-time">1.2 ms</b></span>
+              <span class="meta-item"><i data-lucide="database"></i> Rows Returned: <b id="dml-meta-rows">49</b></span>
+            </div>
+
+            <!-- Results Table -->
+            <div class="table-card dml-results-table-card">
+              <table class="data-table" id="dml-results-table">
+                <thead id="dml-results-thead"></thead>
+                <tbody id="dml-results-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 9. SQL CONSOLE & SCHEMA EXPLORER VIEW -->
+        <section class="view-container" id="view-sql">
+          <div class="view-header">
+            <div>
+              <h1 class="view-title">Interactive SQL Console & Schema Explorer</h1>
+              <p class="view-description">Execute arbitrary SQL queries or inspect the database tables and constraints.</p>
+            </div>
+          </div>
+
+          <div class="sql-workspace-grid">
+            <!-- Left Console Pane -->
+            <div class="sql-pane">
+              <div class="console-box">
+                <div class="console-toolbar">
+                  <span class="console-label"><i data-lucide="terminal"></i> SQL Query Editor</span>
+                  <div class="sample-queries-dropdown">
+                    <select id="sample-query-select">
+                      <option value="">⚡ Load Sample Query...</option>
+                      <option value="SELECT * FROM users;">Users and details</option>
+                      <option value="SELECT ar.Artist_Name, COUNT(s.Song_ID) AS Songs FROM artist ar JOIN artist_song asg ON ar.Artist_ID = asg.Artist_ID JOIN song s ON asg.Song_ID = s.Song_ID GROUP BY ar.Artist_Name ORDER BY Songs DESC;">Songs per artist</option>
+                      <option value="SELECT g.Genre_Name, COUNT(s.Song_ID) AS Total_Songs FROM genre g JOIN song s ON g.Genre_ID = s.Genre_ID GROUP BY g.Genre_Name;">Songs per genre</option>
+                      <option value="SELECT p.Podcast_Name, COUNT(e.Episode_ID) AS Episodes FROM podcast p LEFT JOIN episode e ON p.Podcast_ID = e.Podcast_ID GROUP BY p.Podcast_Name;">Podcasts episode count</option>
+                      <option value="SELECT u.Name, s.Plan_Type, s.Start_Date FROM users u JOIN subscription s ON u.User_ID = s.User_ID;">User subscriptions</option>
+                    </select>
+                  </div>
+                </div>
+                <textarea id="sql-editor-input" placeholder="Type any SQL query here, e.g. SELECT * FROM song WHERE Duration > 300;" rows="6">SELECT Title, Duration FROM song ORDER BY Duration DESC LIMIT 10;</textarea>
+                <div class="console-actions">
+                  <button class="btn btn-outline" id="btn-clear-sql">Clear</button>
+                  <button class="btn btn-primary" id="btn-exec-custom-sql">
+                    <i data-lucide="play"></i> Run Query (Ctrl+Enter)
+                  </button>
+                </div>
+              </div>
+
+              <!-- Custom query feedback -->
+              <div id="custom-query-feedback" style="display: none;"></div>
+
+              <!-- Custom query results -->
+              <div class="table-card mt-3">
+                <div class="table-header-bar">
+                  <span class="table-title">Query Results</span>
+                  <span class="table-count" id="custom-sql-count">0 rows</span>
+                </div>
+                <table class="data-table" id="custom-sql-table">
+                  <thead id="custom-sql-thead"></thead>
+                  <tbody id="custom-sql-tbody">
+                    <tr><td class="text-muted text-center" style="padding: 2rem;">Run a query above to see live results</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Right Schema Pane -->
+            <div class="schema-pane">
+              <div class="schema-card">
+                <div class="schema-header">
+                  <h3><i data-lucide="layers"></i> Table Schema Inspector</h3>
+                  <span class="badge" id="schema-table-count">14 Tables</span>
+                </div>
+                <div class="schema-accordion" id="schema-accordion">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- BOTTOM PERSISTENT AUDIO PLAYER -->
+    <footer class="player-bar" id="player-bar">
+      <!-- Left: Track Info -->
+      <div class="player-track-info">
+        <div class="track-artwork" id="player-artwork">
+          <i data-lucide="disc"></i>
+        </div>
+        <div class="track-meta">
+          <div class="track-title-wrapper">
+            <span class="track-title" id="player-title">Tum Hi Ho</span>
+            <div class="equalizer-indicator" id="equalizer-bars">
+              <div class="eq-bar"></div>
+              <div class="eq-bar"></div>
+              <div class="eq-bar"></div>
+              <div class="eq-bar"></div>
+            </div>
+          </div>
+          <span class="track-artist" id="player-artist">Arijit Singh • Aashiqui 2</span>
+        </div>
+      </div>
+
+      <!-- Middle: Controls & Progress -->
+      <div class="player-controls-container">
+        <div class="player-buttons">
+          <button class="btn-ctrl" id="player-shuffle-btn" title="Shuffle"><i data-lucide="shuffle"></i></button>
+          <button class="btn-ctrl" id="player-prev-btn" title="Previous"><i data-lucide="skip-back"></i></button>
+          <button class="btn-ctrl btn-play-main" id="player-play-btn" title="Play/Pause">
+            <i data-lucide="play" id="play-btn-icon"></i>
+          </button>
+          <button class="btn-ctrl" id="player-next-btn" title="Next"><i data-lucide="skip-forward"></i></button>
+          <button class="btn-ctrl" id="player-loop-btn" title="Loop"><i data-lucide="repeat"></i></button>
+        </div>
+
+        <div class="player-progressbar-wrapper">
+          <span class="time-stamp" id="player-time-elapsed">0:00</span>
+          <div class="progress-bar-container" id="progress-bar-container">
+            <div class="progress-bar-fill" id="progress-bar-fill" style="width: 0%;"></div>
+            <div class="progress-bar-handle" id="progress-bar-handle"></div>
+          </div>
+          <span class="time-stamp" id="player-time-total">4:22</span>
+        </div>
+      </div>
+
+      <!-- Right: Volume & System Badges -->
+      <div class="player-extra-controls">
+        <button class="btn-ctrl" id="btn-volume-icon"><i data-lucide="volume-2"></i></button>
+        <div class="volume-slider-wrapper">
+          <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.7">
+        </div>
+        <div class="player-mode-badge" title="Web Audio Synthesized Audio Playback">
+          <i data-lucide="sparkles"></i> Synthesizer Active
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- MODALS -->
+
+  <!-- 1. DATABASE CONFIGURATION MODAL -->
+  <div class="modal-backdrop" id="db-config-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <i data-lucide="database" class="modal-icon text-green"></i>
+          <h2>Database Configuration</h2>
+        </div>
+        <button class="modal-close-btn" onclick="app.closeModal('db-config-modal')"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-intro">
+          SoundVault supports both <b>MySQL</b> (port 3306) and <b>SQLite</b>. You can test your MySQL connection or switch engines below.
+        </p>
+
+        <div class="status-summary-box" id="db-modal-status-box">
+          <!-- Populated dynamically -->
+        </div>
+
+        <form id="db-config-form" onsubmit="event.preventDefault(); app.saveDbConfig();">
+          <div class="form-row">
+            <div class="form-group flex-2">
+              <label>Host</label>
+              <input type="text" id="cfg-host" value="localhost" required>
+            </div>
+            <div class="form-group flex-1">
+              <label>Port</label>
+              <input type="number" id="cfg-port" value="3306" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>User</label>
+              <input type="text" id="cfg-user" value="root" required>
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" id="cfg-password" placeholder="Enter MySQL password">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Database Name</label>
+            <input type="text" id="cfg-database" value="music_streaming_db" required>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-outline" onclick="app.resetDbData()">
+              <i data-lucide="refresh-cw"></i> Reload Sample Data
+            </button>
+            <button type="submit" class="btn btn-primary" id="btn-save-db-config">
+              <i data-lucide="check"></i> Test & Connect MySQL
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. CREATE PLAYLIST MODAL -->
+  <div class="modal-backdrop" id="create-playlist-modal">
+    <div class="modal-card modal-sm">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <i data-lucide="list-plus" class="modal-icon text-green"></i>
+          <h2>Create New Playlist</h2>
+        </div>
+        <button class="modal-close-btn" onclick="app.closeModal('create-playlist-modal')"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body">
+        <form onsubmit="event.preventDefault(); app.submitNewPlaylist();">
+          <div class="form-group">
+            <label>Playlist Name</label>
+            <input type="text" id="new-playlist-name" placeholder="e.g. Chill Beats, Gym Heavy..." required>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-outline" onclick="app.closeModal('create-playlist-modal')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Create</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. ADD TO PLAYLIST MODAL -->
+  <div class="modal-backdrop" id="add-to-playlist-modal">
+    <div class="modal-card modal-sm">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <i data-lucide="plus-circle" class="modal-icon text-green"></i>
+          <h2>Add Track to Playlist</h2>
+        </div>
+        <button class="modal-close-btn" onclick="app.closeModal('add-to-playlist-modal')"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted mb-2">Select a playlist for <b id="add-modal-song-title">Song</b>:</p>
+        <div class="playlist-choice-list" id="playlist-choice-list">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. PLAYLIST DETAILS MODAL / DRAWER -->
+  <div class="modal-backdrop" id="playlist-details-modal">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <i data-lucide="list-music" class="modal-icon text-green"></i>
+          <h2 id="modal-playlist-name">Playlist Details</h2>
+        </div>
+        <button class="modal-close-btn" onclick="app.closeModal('playlist-details-modal')"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="table-card">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 50px;">Play</th>
+                <th>Title</th>
+                <th>Artist</th>
+                <th>Album</th>
+                <th>Duration</th>
+                <th style="width: 80px; text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="playlist-details-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. ARTIST DETAILS MODAL -->
+  <div class="modal-backdrop" id="artist-details-modal">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <i data-lucide="mic-2" class="modal-icon text-purple"></i>
+          <h2 id="modal-artist-name">Artist Profile</h2>
+        </div>
+        <button class="modal-close-btn" onclick="app.closeModal('artist-details-modal')"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body" id="modal-artist-body"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- SCRIPTS -->
+  <script src="/static/js/player.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
