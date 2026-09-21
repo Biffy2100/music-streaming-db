@@ -32,7 +32,7 @@ English: Display each song along with the name of its artist.
 SELECT S.Title, AR.Artist_Name
 FROM SONG S
 JOIN ARTIST_SONG ASG
-ON S.Song_ID = ASG.Song_ID
+ON S.Song_ID = ASG.Song_ID  
 JOIN ARTIST AR
 ON ASG.Artist_ID = AR.Artist_ID;
 

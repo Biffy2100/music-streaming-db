@@ -114,3 +114,5 @@ WHERE
 GROUP BY
     p.Podcast_ID,
     p.Podcast_Name;
+
+    select * from song;
