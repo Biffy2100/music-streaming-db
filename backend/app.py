@@ -257,6 +257,44 @@ def run_single_dml(query_id):
     })
 
 
+@app.route("/api/stored-programs/listening-history", methods=["GET"])
+def run_listening_history_procedure():
+    user_id = request.args.get("user_id", default=1, type=int)
+    return jsonify(db.run_user_listening_history_procedure(user_id))
+
+
+@app.route("/api/stored-programs/artist-summary", methods=["GET"])
+def run_artist_catalog_procedure():
+    return jsonify(db.run_artist_catalog_summary_procedure())
+
+
+@app.route("/api/stored-programs/song-play-count", methods=["GET"])
+def run_song_play_count_function():
+    song_id = request.args.get("song_id", type=int)
+    if song_id is None:
+        return jsonify({"success": False, "error": "song_id is required"}), 400
+    return jsonify(db.run_stored_function("fn_song_play_count", song_id))
+
+
+@app.route("/api/stored-programs/playlist-song-count", methods=["GET"])
+def run_playlist_song_count_function():
+    playlist_id = request.args.get("playlist_id", type=int)
+    if playlist_id is None:
+        return jsonify({"success": False, "error": "playlist_id is required"}), 400
+    return jsonify(db.run_stored_function("fn_playlist_song_count", playlist_id))
+
+
+@app.route("/api/stored-programs/test-playlist-triggers", methods=["POST"])
+def test_playlist_triggers():
+    data = request.get_json() or {}
+    user_id = data.get("user_id", 1)
+    try:
+        user_id = int(user_id)
+    except (TypeError, ValueError):
+        return jsonify({"success": False, "error": "user_id must be an integer"}), 400
+    return jsonify(db.test_playlist_triggers(user_id))
+
+
 @app.route("/api/custom-query", methods=["POST"])
 def run_custom_query():
     data = request.get_json() or {}

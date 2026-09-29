@@ -133,6 +133,7 @@ class DatabaseManager:
         self.engine_type = "sqlite"  # Default fallback
         self.last_error = None
         self._init_sqlite_if_needed()
+        self._install_sqlite_playlist_triggers()
         self.try_connect_mysql()
 
     def try_connect_mysql(self) -> bool:
@@ -728,6 +729,153 @@ class DatabaseManager:
         LIMIT 50;
         """
         return self.execute_query(sql).get("rows", [])
+
+    def _fetch_cursor_rows(self, cursor) -> Dict[str, Any]:
+        columns = [description[0] for description in cursor.description or []]
+        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return {"success": True, "columns": columns, "rows": rows, "count": len(rows)}
+
+    def run_user_listening_history_procedure(self, user_id: int) -> Dict[str, Any]:
+        """Run the cursor procedure, with a query-equivalent fallback for SQLite."""
+        if self.engine_type != "mysql":
+            return self.execute_query(
+                "SELECT s.Title AS Song_Title, lh.Played_At "
+                "FROM listening_history AS lh JOIN song AS s ON s.Song_ID = lh.Song_ID "
+                "WHERE lh.User_ID = ? ORDER BY lh.Played_At DESC;",
+                (user_id,)
+            )
+
+        conn = self._get_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.callproc("sp_user_listening_history", [user_id])
+            for result in cursor.stored_results():
+                return self._fetch_cursor_rows(result)
+            return {"success": True, "columns": [], "rows": [], "count": 0}
+        except Exception as exc:
+            return {"success": False, "error": str(exc)}
+        finally:
+            cursor.close()
+            conn.close()
+
+    def run_artist_catalog_summary_procedure(self) -> Dict[str, Any]:
+        """Run the cursor procedure, with a query-equivalent fallback for SQLite."""
+        if self.engine_type != "mysql":
+            return self.execute_query(
+                "SELECT ar.Artist_ID, ar.Artist_Name, COUNT(asg.Song_ID) AS Song_Count "
+                "FROM artist AS ar LEFT JOIN artist_song AS asg ON asg.Artist_ID = ar.Artist_ID "
+                "GROUP BY ar.Artist_ID, ar.Artist_Name "
+                "ORDER BY Song_Count DESC, ar.Artist_Name;"
+            )
+
+        conn = self._get_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.callproc("sp_artist_catalog_summary")
+            for result in cursor.stored_results():
+                return self._fetch_cursor_rows(result)
+            return {"success": True, "columns": [], "rows": [], "count": 0}
+        except Exception as exc:
+            return {"success": False, "error": str(exc)}
+        finally:
+            cursor.close()
+            conn.close()
+
+    def run_stored_function(self, function_name: str, record_id: int) -> Dict[str, Any]:
+        """Evaluate one allow-listed stored function or its SQLite equivalent."""
+        if function_name == "fn_song_play_count":
+            if self.engine_type == "mysql":
+                return self.execute_query(
+                    "SELECT fn_song_play_count(%s) AS Play_Count;", (record_id,)
+                )
+            return self.execute_query(
+                "SELECT COUNT(*) AS Play_Count FROM listening_history WHERE Song_ID = ?;",
+                (record_id,)
+            )
+        if function_name == "fn_playlist_song_count":
+            if self.engine_type == "mysql":
+                return self.execute_query(
+                    "SELECT fn_playlist_song_count(%s) AS Song_Count;", (record_id,)
+                )
+            return self.execute_query(
+                "SELECT COUNT(*) AS Song_Count FROM playlist_song WHERE Playlist_ID = ?;",
+                (record_id,)
+            )
+        return {"success": False, "error": "Unknown stored function"}
+
+    def test_playlist_triggers(self, user_id: int) -> Dict[str, Any]:
+        """Verify insert and update playlist triggers without retaining test data."""
+        conn = self._get_connection()
+        cursor = conn.cursor()
+        placeholder = "%s" if self.engine_type == "mysql" else "?"
+        created_date = datetime.now().strftime("%Y-%m-%d")
+        checks = []
+        try:
+            try:
+                cursor.execute(
+                    f"INSERT INTO playlist (Playlist_Name, Created_Date, User_ID) "
+                    f"VALUES ({placeholder}, {placeholder}, {placeholder});",
+                    ("   ", created_date, user_id)
+                )
+                conn.rollback()
+                checks.append({"Trigger": "Before insert", "Result": "FAILED", "Details": "Blank playlist name was accepted"})
+            except Exception as exc:
+                conn.rollback()
+                checks.append({"Trigger": "Before insert", "Result": "PASSED", "Details": str(exc)})
+
+            cursor.execute(
+                f"INSERT INTO playlist (Playlist_Name, Created_Date, User_ID) "
+                f"VALUES ({placeholder}, {placeholder}, {placeholder});",
+                ("Review 2 trigger test", created_date, user_id)
+            )
+            test_playlist_id = cursor.lastrowid
+            try:
+                cursor.execute(
+                    f"UPDATE playlist SET Playlist_Name = {placeholder} WHERE Playlist_ID = {placeholder};",
+                    ("   ", test_playlist_id)
+                )
+                conn.rollback()
+                checks.append({"Trigger": "Before update", "Result": "FAILED", "Details": "Blank playlist name was accepted"})
+            except Exception as exc:
+                conn.rollback()
+                checks.append({"Trigger": "Before update", "Result": "PASSED", "Details": str(exc)})
+            return {
+                "success": all(check["Result"] == "PASSED" for check in checks),
+                "columns": ["Trigger", "Result", "Details"],
+                "rows": checks,
+                "count": len(checks)
+            }
+        except Exception as exc:
+            conn.rollback()
+            return {"success": False, "error": str(exc)}
+        finally:
+            cursor.close()
+            conn.close()
+
+    def _install_sqlite_playlist_triggers(self) -> None:
+        """Mirror the MySQL playlist-name triggers for the SQLite demo engine."""
+        conn = sqlite3.connect(SQLITE_DB_PATH)
+        try:
+            conn.executescript("""
+                CREATE TRIGGER IF NOT EXISTS trg_playlist_before_insert
+                BEFORE INSERT ON playlist
+                FOR EACH ROW
+                WHEN NEW.Playlist_Name IS NULL OR LENGTH(TRIM(NEW.Playlist_Name)) = 0
+                BEGIN
+                    SELECT RAISE(ABORT, 'Playlist name cannot be blank');
+                END;
+
+                CREATE TRIGGER IF NOT EXISTS trg_playlist_before_update
+                BEFORE UPDATE ON playlist
+                FOR EACH ROW
+                WHEN NEW.Playlist_Name IS NULL OR LENGTH(TRIM(NEW.Playlist_Name)) = 0
+                BEGIN
+                    SELECT RAISE(ABORT, 'Playlist name cannot be blank');
+                END;
+            """)
+            conn.commit()
+        finally:
+            conn.close()
 
     def record_play(self, user_id: int, song_id: int) -> Dict[str, Any]:
         """Log a listening history record."""

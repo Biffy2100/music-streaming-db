@@ -891,6 +891,43 @@ body.dark-theme {
   flex-wrap: wrap;
 }
 
+.stored-programs-card {
+  margin-top: 1rem;
+}
+
+.stored-program-controls {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  padding: 1rem 0;
+}
+
+.stored-program-controls label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.stored-program-controls input {
+  width: 90px;
+  padding: 0.55rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-base);
+  color: var(--text-main);
+  font: inherit;
+}
+
+.stored-program-results {
+  overflow-x: auto;
+}
+
+.stored-program-error {
+  color: var(--accent-red);
+}
+
 .query-number-tag {
   font-size: 0.75rem;
   font-weight: 800;

@@ -96,6 +96,10 @@ class SoundVaultApp {
       btnRunDml.addEventListener('click', () => this.runCurrentDml());
     }
 
+    document.querySelectorAll('[data-stored-program]').forEach(button => {
+      button.addEventListener('click', () => this.runStoredProgram(button.dataset.storedProgram));
+    });
+
     // Copy SQL button
     const btnCopySql = document.getElementById('btn-copy-sql');
     if (btnCopySql) {
@@ -612,6 +616,63 @@ class SoundVaultApp {
         ${columns.map(c => `<td>${r[c] !== null && r[c] !== undefined ? r[c] : 'NULL'}</td>`).join('')}
       </tr>
     `).join('');
+  }
+
+  async runStoredProgram(program) {
+    const result = document.getElementById('stored-program-result');
+    const songId = Number(document.getElementById('stored-program-song-id').value);
+    const playlistId = Number(document.getElementById('stored-program-playlist-id').value);
+    const endpoint = {
+      history: `/api/stored-programs/listening-history?user_id=${this.activeUserId}`,
+      artists: '/api/stored-programs/artist-summary',
+      songCount: `/api/stored-programs/song-play-count?song_id=${songId}`,
+      playlistCount: `/api/stored-programs/playlist-song-count?playlist_id=${playlistId}`,
+      triggers: '/api/stored-programs/test-playlist-triggers'
+    }[program];
+
+    try {
+      const response = await fetch(endpoint, {
+        method: program === 'triggers' ? 'POST' : 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        body: program === 'triggers' ? JSON.stringify({ user_id: this.activeUserId }) : undefined
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.error || 'Stored program failed');
+
+      const columns = data.columns || [];
+      const rows = data.rows || [];
+      result.replaceChildren();
+      if (!columns.length || !rows.length) {
+        const empty = document.createElement('p');
+        empty.className = 'text-muted';
+        empty.textContent = 'No rows returned.';
+        result.append(empty);
+        return;
+      }
+
+      const table = document.createElement('table');
+      table.className = 'data-table';
+      table.innerHTML = `<thead><tr>${columns.map(column => `<th>${column}</th>`).join('')}</tr></thead>`;
+      const tbody = document.createElement('tbody');
+      rows.forEach(row => {
+        const tr = document.createElement('tr');
+        columns.forEach(column => {
+          const cell = document.createElement('td');
+          cell.textContent = row[column] ?? 'NULL';
+          tr.append(cell);
+        });
+        tbody.append(tr);
+      });
+      table.append(tbody);
+      result.append(table);
+      this.showToast('Stored program executed');
+    } catch (error) {
+      result.replaceChildren();
+      const message = document.createElement('p');
+      message.className = 'stored-program-error';
+      message.textContent = error.message;
+      result.append(message);
+    }
   }
 
   // --- SQL CONSOLE ---

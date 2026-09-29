@@ -397,6 +397,28 @@
               </table>
             </div>
           </div>
+
+          <div class="dml-card stored-programs-card">
+            <div class="dml-card-header">
+              <div>
+                <span class="query-number-tag">PART 3</span>
+                <h2 class="dml-query-title">Procedures, Functions &amp; Triggers</h2>
+              </div>
+              <span class="meta-item">User: <b>Active profile</b></span>
+            </div>
+            <div class="stored-program-controls">
+              <button class="btn btn-outline" data-stored-program="history">Listening history procedure</button>
+              <button class="btn btn-outline" data-stored-program="artists">Artist summary procedure</button>
+              <label>Song ID <input id="stored-program-song-id" type="number" min="1" value="1"></label>
+              <button class="btn btn-outline" data-stored-program="songCount">Song play-count function</button>
+              <label>Playlist ID <input id="stored-program-playlist-id" type="number" min="1" value="1"></label>
+              <button class="btn btn-outline" data-stored-program="playlistCount">Playlist song-count function</button>
+              <button class="btn btn-primary" data-stored-program="triggers">Test playlist triggers</button>
+            </div>
+            <div class="stored-program-results" id="stored-program-result" aria-live="polite">
+              <p class="text-muted">Choose a procedure, function, or trigger test to view its results.</p>
+            </div>
+          </div>
         </section>
 
         <!-- 9. SQL CONSOLE & SCHEMA EXPLORER VIEW -->
