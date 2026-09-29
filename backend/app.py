@@ -28,6 +28,23 @@ def normalize_audio_name(value):
     return re.sub(r"[^a-z0-9]", "", str(value).casefold())
 
 
+def audio_title_key(filename):
+    stem = os.path.splitext(os.path.basename(filename))[0]
+    suffix = "_spotdown.org"
+    if stem.casefold().endswith(suffix):
+        stem = stem[:-len(suffix)]
+    stem = re.sub(r"\s+-\s+from\s+.*$", "", stem, flags=re.IGNORECASE)
+    stem = re.sub(r"\s+-\s+bonus$", "", stem, flags=re.IGNORECASE)
+    stem = re.sub(r"\s+\([^)]*version\)$", "", stem, flags=re.IGNORECASE)
+    title = normalize_audio_name(stem)
+    aliases = {
+        "emosanalattyachaar": "emosanalatyachar",
+        "maardaala": "maardala",
+        "nadaanparinde": "nadaanparindey",
+    }
+    return aliases.get(title, title)
+
+
 def find_song_audio_url(song):
     audio_root = os.path.join(app.static_folder, "audio")
     if not os.path.isdir(audio_root):
@@ -40,17 +57,16 @@ def find_song_audio_url(song):
         if entry.is_dir() and album_name.startswith(normalize_audio_name(entry.name))
     ]
     if not album_dirs:
-        return None
+        album_dirs = []
 
-    album_dir = max(album_dirs, key=lambda entry: len(entry.name))
-    for entry in os.scandir(album_dir.path):
-        if not entry.is_file() or not entry.name.casefold().endswith(".mp3"):
-            continue
-        stem = entry.name[:-4]
-        suffix = "_spotdown.org"
-        if stem.casefold().endswith(suffix):
-            stem = stem[:-len(suffix)]
-        if normalize_audio_name(stem) == title:
+    for album_dir in sorted(album_dirs, key=lambda entry: len(entry.name), reverse=True):
+        for entry in os.scandir(album_dir.path):
+            if entry.is_file() and entry.name.casefold().endswith(".mp3") and audio_title_key(entry.name) == title:
+                relative_path = os.path.relpath(entry.path, app.static_folder).replace(os.sep, "/")
+                return "/static/" + quote(relative_path, safe="/")
+
+    for entry in os.scandir(audio_root):
+        if entry.is_file() and entry.name.casefold().endswith(".mp3") and audio_title_key(entry.name) == title:
             relative_path = os.path.relpath(entry.path, app.static_folder).replace(os.sep, "/")
             return "/static/" + quote(relative_path, safe="/")
     return None
