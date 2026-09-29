@@ -5,9 +5,11 @@ manages user playlists and playback history, and provides the interactive 10 DML
 """
 
 import os
+import re
 import sys
 import threading
 import webbrowser
+from urllib.parse import quote
 from flask import Flask, jsonify, render_template, request, send_from_directory
 
 # Ensure current directory is in path
@@ -20,6 +22,38 @@ app = Flask(
     template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates"),
     static_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 )
+
+
+def normalize_audio_name(value):
+    return re.sub(r"[^a-z0-9]", "", str(value).casefold())
+
+
+def find_song_audio_url(song):
+    audio_root = os.path.join(app.static_folder, "audio")
+    if not os.path.isdir(audio_root):
+        return None
+
+    album_name = normalize_audio_name(song.get("Album_Name", ""))
+    title = normalize_audio_name(song.get("Title", ""))
+    album_dirs = [
+        entry for entry in os.scandir(audio_root)
+        if entry.is_dir() and album_name.startswith(normalize_audio_name(entry.name))
+    ]
+    if not album_dirs:
+        return None
+
+    album_dir = max(album_dirs, key=lambda entry: len(entry.name))
+    for entry in os.scandir(album_dir.path):
+        if not entry.is_file() or not entry.name.casefold().endswith(".mp3"):
+            continue
+        stem = entry.name[:-4]
+        suffix = "_spotdown.org"
+        if stem.casefold().endswith(suffix):
+            stem = stem[:-len(suffix)]
+        if normalize_audio_name(stem) == title:
+            relative_path = os.path.relpath(entry.path, app.static_folder).replace(os.sep, "/")
+            return "/static/" + quote(relative_path, safe="/")
+    return None
 
 
 # --- Frontend Route ---
@@ -80,6 +114,8 @@ def list_songs():
         album_id=album_id, 
         limit=limit
     )
+    for song in songs:
+        song["Audio_URL"] = find_song_audio_url(song)
     return jsonify(songs)
 
 

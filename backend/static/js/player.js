@@ -14,6 +14,8 @@ class AudioPlayer {
     this.isLoop = false;
     this.queue = [];
     this.queueIndex = -1;
+    this.audio = new Audio();
+    this.audio.volume = this.volume;
 
     // Web Audio synthesizer components
     this.audioCtx = null;
@@ -45,6 +47,20 @@ class AudioPlayer {
   }
 
   bindEvents() {
+    this.audio.addEventListener('loadedmetadata', () => {
+      if (Number.isFinite(this.audio.duration)) {
+        this.duration = this.audio.duration;
+        if (this.elTimeTotal) this.elTimeTotal.textContent = this.formatTime(this.duration);
+        this.updateProgressUI();
+      }
+    });
+    this.audio.addEventListener('timeupdate', () => {
+      this.currentTime = this.audio.currentTime;
+      this.updateProgressUI();
+    });
+    this.audio.addEventListener('ended', () => {
+      if (!this.isLoop) this.next();
+    });
     if (this.elPlayBtn) {
       this.elPlayBtn.addEventListener('click', () => this.togglePlay());
     }
@@ -64,6 +80,7 @@ class AudioPlayer {
     if (this.elLoopBtn) {
       this.elLoopBtn.addEventListener('click', () => {
         this.isLoop = !this.isLoop;
+        this.audio.loop = this.isLoop;
         this.elLoopBtn.style.color = this.isLoop ? 'var(--accent-green)' : 'var(--text-muted)';
         app.showToast(this.isLoop ? 'Repeat track enabled' : 'Repeat track disabled');
       });
@@ -83,6 +100,7 @@ class AudioPlayer {
     if (this.elVolumeIcon) {
       this.elVolumeIcon.addEventListener('click', () => {
         this.isMuted = !this.isMuted;
+        this.audio.muted = this.isMuted;
         if (this.masterGain) {
           this.masterGain.gain.value = this.isMuted ? 0 : this.volume;
         }
@@ -159,9 +177,17 @@ class AudioPlayer {
   }
 
   setTrack(track, queue = []) {
+    this.audio.pause();
     this.currentTrack = track;
     this.duration = track.Duration || 240;
     this.currentTime = 0;
+    this.audio.loop = this.isLoop;
+    if (track.Audio_URL) {
+      this.audio.src = track.Audio_URL;
+    } else {
+      this.audio.removeAttribute('src');
+      this.audio.load();
+    }
 
     if (queue.length > 0) {
       this.queue = queue;
@@ -192,7 +218,7 @@ class AudioPlayer {
         if (app.currentView === 'history' || app.currentView === 'home') {
           app.loadHistory();
         }
-      }).catch(() => {});
+      }).catch(() => { });
     }
   }
 
@@ -200,10 +226,23 @@ class AudioPlayer {
     this.isPlaying = true;
     if (this.elEqualizer) this.elEqualizer.classList.add('active');
     this.updatePlayBtnUI();
-    this.startSynthesizer();
+    if (this.currentTrack && this.currentTrack.Audio_URL) {
+      this.stopSynthesizer();
+      this.audio.play().catch(() => {
+        this.pause();
+        if (window.app) app.showToast('Unable to play this audio file');
+      });
+    } else {
+      this.startSynthesizer();
+    }
 
     if (this.tickerInterval) clearInterval(this.tickerInterval);
     this.tickerInterval = setInterval(() => {
+      if (this.currentTrack && this.currentTrack.Audio_URL) {
+        this.currentTime = this.audio.currentTime;
+        this.updateProgressUI();
+        return;
+      }
       if (this.currentTime >= this.duration) {
         if (this.isLoop) {
           this.seekTo(0);
@@ -227,6 +266,7 @@ class AudioPlayer {
 
   pause() {
     this.isPlaying = false;
+    this.audio.pause();
     if (this.elEqualizer) this.elEqualizer.classList.remove('active');
     this.updatePlayBtnUI();
     this.stopSynthesizer();
@@ -274,12 +314,17 @@ class AudioPlayer {
 
   seekTo(seconds) {
     this.currentTime = Math.max(0, Math.min(seconds, this.duration));
+    if (this.currentTrack && this.currentTrack.Audio_URL && this.audio.readyState > 0) {
+      this.audio.currentTime = this.currentTime;
+    }
     this.updateProgressUI();
   }
 
   setVolume(vol) {
     this.volume = vol;
     this.isMuted = false;
+    this.audio.volume = vol;
+    this.audio.muted = false;
     if (this.masterGain) {
       this.masterGain.gain.value = vol;
     }
